@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Room Renovation Punchlist — Seda Lio</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #1e5fa8;
+    --blue-light: #e8f0fb;
+    --blue-mid: #3b82c4;
+    --red: #c0392b;
+    --red-light: #fdecea;
+    --green: #1a7a4a;
+    --green-light: #e8f7ee;
+    --amber: #b45309;
+    --amber-light: #fef3cd;
+    --gray: #6b7280;
+    --gray-light: #f3f4f6;
+    --border: #d1d5db;
+    --text: #111827;
+    --text-sec: #6b7280;
+    --white: #ffffff;
+  }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: #f0f2f5;
+    padding: 24px;
+    line-height: 1.5;
+  }
+
+  .page { max-width: 860px; margin: 0 auto; }
+
+  /* HEADER */
+  .form-header {
+    background: var(--blue);
+    color: white;
+    border-radius: 8px 8px 0 0;
+    padding: 20px 24px 16px;
+  }
+  .form-header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .form-header .sub { font-size: 12px; opacity: 0.8; margin-top: 3px; }
+  .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .logo-box {
+    width: 38px; height: 38px; background: rgba(255,255,255,0.18);
+    border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+  }
+  .property-tag {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+    opacity: 0.65; margin-bottom: 2px;
+  }
+
+  /* SUMMARY BAR */
+  .summary-bar {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    background: white; border: 1px solid var(--border); border-top: none;
+  }
+  .sum-card { padding: 11px 16px; border-right: 1px solid var(--border); }
+  .sum-card:last-child { border-right: none; }
+  .sum-card .num { font-size: 22px; font-weight: 700; }
+  .sum-card .lbl { font-size: 10px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  .sum-total .num { color: var(--blue); }
+  .sum-ok .num { color: var(--green); }
+  .sum-defect .num { color: var(--red); }
+  .sum-pending .num { color: var(--amber); }
+
+  /* TOOLBAR */
+  .toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: white; border: 1px solid var(--border); border-top: none;
+    padding: 9px 16px; gap: 10px; flex-wrap: wrap;
+  }
+  .toolbar-left { display: flex; gap: 7px; flex-wrap: wrap; }
+  .btn {
+    padding: 6px 13px; border-radius: 5px; font-size: 12px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border); font-family: inherit;
+    display: inline-flex; align-items: center; gap: 5px; transition: background 0.1s; background: white; color: var(--text);
+  }
+  .btn:hover { background: var(--gray-light); }
+  .btn-primary { background: var(--blue); color: white; border-color: var(--blue); }
+  .btn-primary:hover { background: #174e90; }
+  .btn-danger { color: var(--red); border-color: #e0a0a0; }
+  .btn-danger:hover { background: var(--red-light); }
+  .progress-wrap { display: flex; align-items: center; gap: 8px; }
+  .progress-label { font-size: 12px; color: var(--text-sec); }
+  .progress-bar-bg { height: 6px; background: #e5e7eb; border-radius: 3px; width: 110px; }
+  .progress-bar-fill { height: 100%; background: var(--blue); border-radius: 3px; width: 0%; transition: width 0.3s; }
+
+  /* META */
+  .meta-section {
+    background: white; border: 1px solid var(--border); border-top: none; padding: 14px 24px;
+  }
+  .meta-section h2 { font-size: 11px; font-weight: 600; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 16px; }
+  .meta-field label { display: block; font-size: 11px; color: var(--text-sec); margin-bottom: 3px; font-weight: 500; }
+  .meta-field input {
+    width: 100%; padding: 6px 10px; border: 1px solid var(--border);
+    border-radius: 5px; font-size: 13px; color: var(--text); background: var(--white); font-family: inherit;
+  }
+  .meta-field input:focus { outline: 2px solid var(--blue-mid); outline-offset: -1px; border-color: var(--blue-mid); }
+  .meta-field .fixed-val {
+    padding: 6px 10px; border: 1px solid var(--border); border-radius: 5px;
+    font-size: 13px; color: var(--text-sec); background: #f9fafb; font-style: italic;
+  }
+
+  /* SECTION */
+  .section { background: white; border: 1px solid var(--border); border-top: none; overflow: hidden; }
+  .section-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 16px; background: #f7f8fa; border-bottom: 1px solid var(--border);
+    cursor: pointer; user-select: none;
+  }
+  .section-header:hover { background: #eef0f5; }
+  .section-icon { font-size: 15px; }
+  .section-title { font-size: 13px; font-weight: 600; flex: 1; }
+  .section-count { font-size: 11px; color: var(--text-sec); }
+  .collapse-icon { font-size: 11px; color: var(--text-sec); transition: transform 0.15s; }
+  .section.collapsed .collapse-icon { transform: rotate(-90deg); }
+  .section.collapsed .section-body { display: none; }
+
+  /* ITEM */
+  .item { border-bottom: 1px solid #f0f0f0; padding: 11px 16px; }
+  .item:last-child { border-bottom: none; }
+  .item:hover { background: #fafafa; }
+  .item-top { display: flex; align-items: flex-start; gap: 10px; }
+  .item-num { font-size: 11px; color: var(--text-sec); min-width: 22px; padding-top: 2px; flex-shrink: 0; }
+  .item-info { flex: 1; }
+  .item-name { font-size: 13px; font-weight: 500; }
+  .item-sub { font-size: 11px; color: var(--text-sec); margin-top: 2px; }
+  .item-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  select.status-sel {
+    font-size: 12px; padding: 5px 8px; border: 1px solid var(--border);
+    border-radius: 5px; background: white; color: var(--text);
+    cursor: pointer; font-family: inherit; min-width: 138px;
+  }
+  select.status-sel.ok { border-color: #6db88a; background: var(--green-light); color: var(--green); font-weight: 600; }
+  select.status-sel.defect { border-color: #e08080; background: var(--red-light); color: var(--red); font-weight: 600; }
+  select.status-sel.monitoring { border-color: #d4a843; background: var(--amber-light); color: var(--amber); font-weight: 600; }
+
+  /* PHOTO BUTTON — shows next to status only when defect/monitoring */
+  .photo-btn {
+    display: none; align-items: center; gap: 5px;
+    padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: 500;
+    cursor: pointer; border: 1px solid #e0a0a0; background: white; color: var(--red);
+    font-family: inherit; white-space: nowrap; transition: background 0.1s;
+  }
+  .photo-btn:hover { background: var(--red-light); }
+  .photo-btn.visible { display: inline-flex; }
+  .photo-btn .badge {
+    background: var(--red); color: white; border-radius: 9px;
+    font-size: 10px; min-width: 16px; height: 16px; display: inline-flex;
+    align-items: center; justify-content: center; padding: 0 4px;
+  }
+  .photo-btn .badge.zero { display: none; }
+
+  /* DEFECT PANEL */
+  .defect-panel {
+    margin: 9px 0 0 32px; background: var(--red-light);
+    border: 1px solid #f0c0c0; border-radius: 6px; padding: 11px 13px; display: none;
+  }
+  .defect-panel.visible { display: block; }
+  .defect-panel .panel-label { font-size: 11px; font-weight: 600; color: var(--red); margin-bottom: 5px; }
+  .remarks-box {
+    width: 100%; padding: 7px 10px; border: 1px solid #e0a0a0;
+    border-radius: 5px; background: white; font-size: 12px; color: var(--text);
+    font-family: inherit; resize: vertical; min-height: 50px; margin-bottom: 10px;
+  }
+  .remarks-box:focus { outline: 2px solid var(--red); outline-offset: -1px; }
+
+  /* PHOTO UPLOAD ZONE */
+  .upload-zone {
+    border: 2px dashed #e0a0a0; border-radius: 6px; padding: 12px;
+    text-align: center; cursor: pointer; background: white; transition: background 0.15s;
+  }
+  .upload-zone:hover { background: #fdf0ef; border-color: var(--red); }
+  .upload-zone input[type=file] { display: none; }
+  .upload-zone p { font-size: 11px; color: var(--text-sec); margin-top: 2px; }
+  .upload-icon { font-size: 20px; }
+  .photo-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .photo-thumb {
+    position: relative; width: 80px; height: 80px;
+    border-radius: 5px; overflow: hidden; border: 1px solid var(--border); background: #f0f0f0;
+    flex-shrink: 0;
+  }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .del-btn {
+    position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(0,0,0,0.6); color: white; border: none; font-size: 10px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;
+  }
+  .photo-caption { font-size: 10px; color: var(--text-sec); text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 80px; margin-top: 2px; }
+
+  /* OK remarks (simple inline note) */
+  .ok-note { margin: 7px 0 0 32px; display: none; }
+  .ok-note input {
+    width: 100%; padding: 5px 10px; border: 1px solid var(--border);
+    border-radius: 5px; font-size: 12px; color: var(--text); font-family: inherit; background: white;
+  }
+
+  /* FINAL / SIGN */
+  .final-section {
+    background: white; border: 1px solid var(--border); border-top: none; padding: 16px 24px;
+    border-radius: 0 0 8px 8px;
+  }
+  .final-section h3 { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .final-section textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: 5px; font-size: 12px; color: var(--text); font-family: inherit;
+    resize: vertical; min-height: 60px;
+  }
+  .sign-row { display: flex; gap: 40px; margin-top: 28px; align-items: flex-end; }
+  .sign-box { flex: 1; }
+  .sign-line { border-bottom: 1.5px solid var(--text); margin-bottom: 5px; height: 36px; }
+  .sign-box label { font-size: 11px; color: var(--text-sec); }
+
+  /* PRINT */
+  @media print {
+    body { background: white; padding: 0; font-size: 11px; }
+    .page { max-width: 100%; }
+    .toolbar, .upload-zone, .del-btn, .photo-btn { display: none !important; }
+    .section.collapsed .section-body { display: block !important; }
+    .defect-panel { display: block !important; background: #fff8f8 !important; border: 1px solid #ccc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .form-header { background: var(--blue) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .section-header { background: #f7f8fa !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    select { -webkit-appearance: none; }
+    .item { page-break-inside: avoid; }
+    .photo-thumb { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="form-header">
+    <div class="header-top">
+      <div class="logo-box">🏨</div>
+      <div>
+        <div class="property-tag">Internal Documentation · Seda Lio</div>
+        <h1>Room Renovation Punchlist</h1>
+      </div>
+    </div>
+    <div class="sub">Soft repainting &amp; preventive maintenance inspection — cost justification record</div>
+  </div>
+
+  <!-- SUMMARY BAR -->
+  <div class="summary-bar">
+    <div class="sum-card sum-total"><div class="num" id="cnt-total">0</div><div class="lbl">Total items</div></div>
+    <div class="sum-card sum-ok"><div class="num" id="cnt-ok">0</div><div class="lbl">✓ Acceptable</div></div>
+    <div class="sum-card sum-defect"><div class="num" id="cnt-defect">0</div><div class="lbl">✗ With defect</div></div>
+    <div class="sum-card sum-pending"><div class="num" id="cnt-pending">0</div><div class="lbl">⚠ Monitoring</div></div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Print / Save PDF</button>
+      <button class="btn" onclick="expandAll()">▾ Expand all</button>
+      <button class="btn" onclick="collapseAll()">▴ Collapse all</button>
+      <button class="btn btn-danger" onclick="resetForm()">↺ Reset</button>
+    </div>
+    <div class="progress-wrap">
+      <span class="progress-label">Completion: <strong id="pct">0%</strong></span>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- META -->
+  <div class="meta-section">
+    <h2>Inspection details</h2>
+    <div class="meta-grid">
+      <div class="meta-field">
+        <label>Property</label>
+        <div class="fixed-val">Seda Lio</div>
+      </div>
+      <div class="meta-field"><label>Room / unit no.</label><input type="text" placeholder="e.g. 204" id="meta-room"/></div>
+      <div class="meta-field"><label>Building / wing</label><input type="text" placeholder="e.g. Block A" id="meta-building"/></div>
+      <div class="meta-field"><label>Inspected by</label><input type="text" placeholder="Full name" id="meta-inspector"/></div>
+      <div class="meta-field"><label>Inspection date</label><input type="date" id="meta-date"/></div>
+    </div>
+  </div>
+
+  <!-- SECTIONS -->
+  <div id="sections-container"></div>
+
+  <!-- FINAL NOTES + SIGN OFF -->
+  <div class="final-section" style="border-top:1px solid var(--border);border-radius:0 0 8px 8px;">
+    <h3>📝 Overall remarks &amp; additional notes</h3>
+    <textarea placeholder="General observations, contractor notes, cost estimates, materials needed, follow-up schedule..."></textarea>
+    <div class="sign-row">
+      <div class="sign-box">
+        <div class="sign-line"></div>
+        <label>Inspected by — signature over printed name</label>
+      </div>
+      <div class="sign-box" style="max-width: 160px;">
+        <div class="sign-line"></div>
+        <label>Date</label>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SECTIONS = [
+  {
+    icon: "🧱", title: "Walls & surfaces",
+    items: [
+      { name: "Wall paint — overall condition", sub: "Peeling, bubbling, fading, discoloration on all walls" },
+      { name: "Paint stains / splatter marks", sub: "Identify location and extent on all four walls" },
+      { name: "Scuff marks & scratches on walls", sub: "Near door frames, switches, furniture contact points" },
+      { name: "Wall cracks or hairlines", sub: "Mark location; note if structural or cosmetic" },
+      { name: "Wall sealant / caulk condition", sub: "Joints, corners, perimeter sealant integrity" },
+      { name: "Paint stains on skirting / trim", sub: "Skirting boards, baseboards, door architraves" },
+    ]
+  },
+  {
+    icon: "⬜", title: "Ceiling",
+    items: [
+      { name: "Ceiling paint condition", sub: "Stains, yellowing, watermarks, flaking or peeling" },
+      { name: "Ceiling cracks", sub: "Note hairline vs. structural; record size and location" },
+      { name: "Cornice / coving condition", sub: "Cracks, gaps, paint adhesion along edges" },
+      { name: "Paint stains on ceiling", sub: "Water or splash stains; AC unit overflow marks" },
+    ]
+  },
+  {
+    icon: "💡", title: "Lighting & emergency lights",
+    items: [
+      { name: "Main room light — functionality", sub: "All bulbs operational; switch response; dimmer if present" },
+      { name: "Bedside / reading light (left)", sub: "Bulb type, brightness, switch function" },
+      { name: "Bedside / reading light (right)", sub: "Bulb type, brightness, switch function" },
+      { name: "Bathroom light — functionality", sub: "Operational; check for water ingress on fixture" },
+      { name: "Emergency light — activation test", sub: "Triggers on power cut; battery backup working" },
+      { name: "Emergency light — indicator lamp", sub: "Charging indicator lit and correct color" },
+      { name: "Emergency light — cleanliness", sub: "Dust, paint overspray, lens clarity" },
+      { name: "Emergency light — mounting & housing", sub: "Secure installation; no loose fittings or cracked casing" },
+      { name: "Exit sign illumination", sub: "Legible; backup power functional during test" },
+    ]
+  },
+  {
+    icon: "🛏️", title: "Bed, headboard & bedside",
+    items: [
+      { name: "Headboard — surface condition", sub: "Paint, upholstery, or lacquer; chips, stains, wear" },
+      { name: "Bed frame / base — paint & finish", sub: "Structural integrity; paint or finish condition" },
+      { name: "Bedside table / nightstand (left)", sub: "Surface scratches, stains; drawer operation; paint condition" },
+      { name: "Bedside table / nightstand (right)", sub: "Surface scratches, stains; drawer operation; paint condition" },
+      { name: "Bed cabinet paint & finish", sub: "Paint adhesion, discoloration, touch-up areas" },
+    ]
+  },
+  {
+    icon: "📺", title: "TV cabinet & room furniture",
+    items: [
+      { name: "TV cabinet — surface & paint condition", sub: "Paint, veneer, or laminate; chips, scratches, stains" },
+      { name: "TV cabinet — doors & drawers", sub: "Alignment, hinges, handles; smooth operation" },
+      { name: "TV cabinet — paint finish quality", sub: "Even coat; no runs, drips, or missed spots" },
+      { name: "Wardrobe / closet — exterior paint", sub: "Paint or finish; door alignment; hardware condition" },
+      { name: "Wardrobe — interior condition", sub: "Stains, mildew, paint condition inside; rod & hooks" },
+      { name: "Other furniture paint / finish", sub: "Desk, chairs, shelves — specify item in remarks" },
+    ]
+  },
+  {
+    icon: "🚽", title: "Toilet & bathroom",
+    items: [
+      { name: "Tile grout — wall tiles", sub: "Discoloration, mold, missing or crumbling grout lines" },
+      { name: "Tile grout — floor tiles", sub: "Cracking, staining, mold growth at tile joints" },
+      { name: "Sealant — bathtub / shower enclosure", sub: "Silicone integrity; mold, peeling, or gaps" },
+      { name: "Sealant — vanity / sink basin", sub: "Around basin edges; silicone condition and color" },
+      { name: "Sealant — floor-to-wall joint", sub: "Corner seal; no lifting, cracking, or discoloration" },
+      { name: "Bathroom wall paint / tile condition", sub: "Paint above tiles; tile chips or cracks" },
+      { name: "Paint stains on bathroom fixtures", sub: "On toilet pan, basin, taps, fittings from repainting" },
+      { name: "Toilet — general condition", sub: "Flush mechanism, seat, hinge, lid; no chips or cracks" },
+      { name: "Shower / bathroom accessories", sub: "Towel rails, soap holder, TP holder — finish & mounting" },
+    ]
+  },
+  {
+    icon: "🚪", title: "Doors, windows & frames",
+    items: [
+      { name: "Room entry door — paint condition", sub: "Both sides; chips, scratches, finish uniformity" },
+      { name: "Room door frame paint", sub: "Paint adhesion, stains, overspray from works" },
+      { name: "Bathroom door — paint & door seal", sub: "Paint condition; bottom door seal / sweep intact" },
+      { name: "Window frame — paint & finish", sub: "Paint or finish; no flaking or moisture damage" },
+      { name: "Window sill — sealant & paint", sub: "Sealant condition; no paint stains on glass pane" },
+    ]
+  }
+];
+
+let photoData = {};
+
+function key(s, i) { return `s${s}_i${i}`; }
+
+function buildSections() {
+  const container = document.getElementById('sections-container');
+  let num = 1;
+  SECTIONS.forEach((sec, sIdx) => {
+    const secEl = document.createElement('div');
+    secEl.className = 'section';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'section-header';
+    hdr.innerHTML = `<span class="section-icon">${sec.icon}</span>
+      <span class="section-title">${sec.title}</span>
+      <span class="section-count">${sec.items.length} items</span>
+      <span class="collapse-icon">▾</span>`;
+    hdr.addEventListener('click', () => secEl.classList.toggle('collapsed'));
+
+    const body = document.createElement('div');
+    body.className = 'section-body';
+
+    sec.items.forEach((item, iIdx) => {
+      const k = key(sIdx, iIdx);
+      const n = num++;
+      const el = document.createElement('div');
+      el.className = 'item';
+      el.innerHTML = `
+        <div class="item-top">
+          <span class="item-num">${n}.</span>
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-sub">${item.sub}</div>
+          </div>
+          <div class="item-controls">
+            <select class="status-sel" id="status-${k}" onchange="onStatus('${k}')">
+              <option value="">— select status —</option>
+              <option value="ok">✓ Acceptable</option>
+              <option value="defect">✗ With defect</option>
+              <option value="monitoring">⚠ Monitoring</option>
+              <option value="na">N/A</option>
+            </select>
+            <button class="photo-btn visible" id="photobtn-${k}" onclick="togglePhotoPanel('${k}')">
+              📷 Add photos <span class="badge zero" id="badge-${k}">0</span>
+            </button>
+          </div>
+        </div>
+        <div class="defect-panel" id="defect-${k}">
+          <div class="panel-label">📋 Defect description &amp; location</div>
+          <textarea class="remarks-box" placeholder="Describe the defect, exact location, extent of damage, recommended action..."></textarea>
+          <div id="photopanel-${k}" style="display:block; margin-top:10px;">
+            <div class="panel-label" style="margin-bottom:6px;">📸 Photo evidence</div>
+            <div class="upload-zone" onclick="document.getElementById('file-${k}').click()" ondragover="event.preventDefault()" ondrop="handleDrop(event,'${k}')">
+              <input type="file" id="file-${k}" accept="image/*" capture="environment" multiple onchange="handleFiles(this.files,'${k}')"/>
+              <div class="upload-icon">📷</div>
+              <p>Click to upload or drag &amp; drop photos here</p>
+              <p style="font-size:10px;margin-top:2px;">JPG, PNG, HEIC — multiple files OK</p>
+            </label>
+            <div class="photo-grid" id="photos-${k}"></div>
+          </div>
+        </div>
+        <div class="ok-note" id="oknote-${k}">
+          <input type="text" placeholder="Optional note (e.g. minor wear — acceptable, no action needed)..."/>
+        </div>`;
+      body.appendChild(el);
+    });
+
+    secEl.appendChild(hdr);
+    secEl.appendChild(body);
+    container.appendChild(secEl);
+  });
+
+  updateSummary();
+}
+
+function onStatus(k) {
+  const sel = document.getElementById(`status-${k}`);
+  const panel = document.getElementById(`defect-${k}`);
+  const okNote = document.getElementById(`oknote-${k}`);
+  const photoBtn = document.getElementById(`photobtn-${k}`);
+  const v = sel.value;
+
+  sel.className = 'status-sel ' + (v || '');
+
+  const isDefect = v === 'defect' || v === 'monitoring';
+  panel.classList.toggle('visible', isDefect);
+  photoBtn.classList.add('visible');
+  okNote.style.display = (v === 'ok' || v === 'na') ? 'block' : 'none';
+
+  
+
+  updateSummary();
+}
+
+function togglePhotoPanel(k) {
+  const pp = document.getElementById(`photopanel-${k}`);
+  pp.style.display = pp.style.display === 'none' ? 'block' : 'none';
+}
+
+
+function handleFiles(files, k) {
+  if (!photoData[k]) photoData[k] = [];
+
+  Array.from(files).forEach(file => {
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+
+        let width = img.width;
+        let height = img.height;
+
+        const maxWidth = 1200;
+
+        if (width > maxWidth) {
+          height = Math.round(height * (maxWidth / width));
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressed = canvas.toDataURL('image/jpeg', 0.7);
+
+        photoData[k].push({
+          name: file.name,
+          dataUrl: compressed
+        });
+
+        renderPhotos(k);
+      };
+
+      img.src = e.target.result;
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+
+function handleDrop(e, k) { e.preventDefault(); handleFiles(e.dataTransfer.files, k); }
+
+function renderPhotos(k) {
+  const grid = document.getElementById(`photos-${k}`);
+  const badge = document.getElementById(`badge-${k}`);
+  if (!grid) return;
+  const photos = photoData[k] || [];
+  badge.textContent = photos.length;
+  badge.className = 'badge' + (photos.length === 0 ? ' zero' : '');
+  grid.innerHTML = '';
+  photos.forEach((p, idx) => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;';
+    wrap.innerHTML = `<div class="photo-thumb">
+      <img src="${p.dataUrl}" alt="${p.name}"/>
+      <button class="del-btn" onclick="removePhoto('${k}',${idx})">✕</button>
+    </div>
+    <div class="photo-caption">${p.name}</div>`;
+    grid.appendChild(wrap);
+  });
+}
+
+function removePhoto(k, idx) { photoData[k].splice(idx, 1); renderPhotos(k); }
+
+function updateSummary() {
+  const sels = document.querySelectorAll('.status-sel');
+  let total = sels.length, ok = 0, defect = 0, monitoring = 0, filled = 0;
+  sels.forEach(s => {
+    if (s.value) filled++;
+    if (s.value === 'ok' || s.value === 'na') ok++;
+    else if (s.value === 'defect') defect++;
+    else if (s.value === 'monitoring') monitoring++;
+  });
+  document.getElementById('cnt-total').textContent = total;
+  document.getElementById('cnt-ok').textContent = ok;
+  document.getElementById('cnt-defect').textContent = defect;
+  document.getElementById('cnt-pending').textContent = monitoring;
+  const pct = total ? Math.round(filled / total * 100) : 0;
+  document.getElementById('pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+}
+
+function expandAll() { document.querySelectorAll('.section').forEach(s => s.classList.remove('collapsed')); }
+function collapseAll() { document.querySelectorAll('.section').forEach(s => s.classList.add('collapsed')); }
+
+function resetForm() {
+  if (!confirm('Reset all entries? This will clear all statuses, remarks, and uploaded photos.')) return;
+  document.querySelectorAll('.status-sel').forEach(s => { s.value = ''; s.className = 'status-sel'; });
+  document.querySelectorAll('.remarks-box').forEach(t => t.value = '');
+  document.querySelectorAll('.ok-note input').forEach(i => i.value = '');
+  document.querySelectorAll('.defect-panel').forEach(p => p.classList.remove('visible'));
+  document.querySelectorAll('.ok-note').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.photo-btn').forEach(b => b.classList.remove('visible'));
+  document.querySelectorAll('[id^="photopanel-"]').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.photo-grid').forEach(g => g.innerHTML = '');
+  document.querySelectorAll('.badge').forEach(b => { b.textContent = '0'; b.className = 'badge zero'; });
+  photoData = {};
+  updateSummary();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const d = document.getElementById('meta-date');
+  if (d) d.value = new Date().toISOString().split('T')[0];
+  buildSections();
+});
+</script>
+</body>
+</html>
